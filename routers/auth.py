@@ -101,6 +101,26 @@ def login(data: LoginIn, db: Session = Depends(get_db)):
     return TokenOut(access_token=token)
 
 
-@router.post("/about", response_model=UserOut)
+@router.post("/about", response_model=UserOut) # fetches user information
 def about(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT) # no content = user isnt getting data back since we are changing password
+def change_password(
+    payload: PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if not bcrypt.verify(payload.current_password, current_user.password_hash): # remember, the user is changing their password bc they want to, not bc they forgot it. 
+        raise HTTPException(status_code=400, detail="Current password is incorrect") # first, they need to provide their current password to be able to change it to a new one.
+    
+    current_user.password_hash = bcrypt.hash(payload.new_password)
+    db.add(current_user)
+    db.commit()
+    return
+
+
+@router.post("/refresh", response_model=TokenOut)
+def refresh(current_user: User = Depends(get_current_user)): # user token still has to be active.
+    token = create_access_token(user_id=current_user.id) # user gets a fresh JWT and gets to stay in the same session without having to log in again.
+    return TokenOut(access_token=token)
