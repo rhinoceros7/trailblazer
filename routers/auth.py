@@ -35,7 +35,7 @@ class LoginIn(BaseModel):
 
 class TokenOut(BaseModel):
     access_token: str
-    token_type: str = "bearer" # this maps back to the get_current_user in deps.py which we use to show we are getting a user
+    token_type: str = "bearer" # this maps back to the get_current_user in callback.py which we use to show we are getting a user
 
 
 class UserOut(BaseModel): # user can access this information
