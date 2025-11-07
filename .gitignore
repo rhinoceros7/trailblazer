@@ -1,0 +1,21 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Android/Gradle
+.android/
+.gradle/
+local.properties
+**/build/
+app/build/
+*.keystore
+
+# OS junk
+.DS_Store
+Thumbs.db
