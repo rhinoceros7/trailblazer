@@ -3,6 +3,8 @@
 * DM Ryan for the local.properties file that holds key for google maps API.
 * Quick update: We are using kotlin for the frontend and map wiring. Rafi says we can hook it up to the figma which is fire.
 
+* I wired up the api to the app frontend, it should work properly with backend, I just couldn't verify because of no .env for NPS API. -RK
+
 A few pointers in case yall need some help with the frontend:
 
 POST auth/register (email, password, display name) returns access token
