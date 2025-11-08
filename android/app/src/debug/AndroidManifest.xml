@@ -1,0 +1,6 @@
+<manifest package="com.example.trailblazer"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config_debug" />
+</manifest>

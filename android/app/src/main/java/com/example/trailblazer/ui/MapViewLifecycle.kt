@@ -11,12 +11,13 @@ fun rememberMapViewWithLifecycle(): MapView {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    // Tie MapView lifecycle to this composition
     DisposableEffect(Unit) {
         mapView.onCreate(Bundle())
+        mapView.onStart()
         mapView.onResume()
         onDispose {
             mapView.onPause()
+            mapView.onStop()
             mapView.onDestroy()
         }
     }

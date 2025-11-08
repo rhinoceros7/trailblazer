@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.trailblazer
 
 import org.junit.Test
 
