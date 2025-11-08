@@ -1,4 +1,7 @@
-DM Nafis for .env file that holds key for JWT secret, and the later is gonna have the NPS API. I'll email it to you guys.
+* DM Nafis for .env file that holds key for JWT secret, and the later is gonna have the NPS API. I'll email it to you guys.
+
+* DM Ryan for the local.properties file that holds key for google maps API.
+* Quick update: We are using kotlin for the frontend and map wiring. Rafi says we can hook it up to the figma which is fire.
 
 A few pointers in case yall need some help with the frontend:
 
@@ -17,5 +20,3 @@ GET /trails/{id}/review -- gives us the reviews of the specific trail
 GET /parks?near=lat,lon&radius=km -- is a list of parks from the NPS API
 
 GET /parks/{id} -- detials of a specific park
-
-Then you can use Leaflet to show the parks and trails
