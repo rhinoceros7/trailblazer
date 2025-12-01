@@ -29,7 +29,7 @@ GET /parks/{id} -- details of a specific park
 
 GET /parks -- lists all the parks
 
-**BIG UPDATE 12/1/2025**
+**-------------------BIG UPDATE 12/1/2025-------------------**
 
 POST /trails/{trail_id}/photos -- upload photo for a trail
 
