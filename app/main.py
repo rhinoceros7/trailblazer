@@ -7,16 +7,15 @@ Main for Trailblazer
 - static files for photos
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles  # where we have images
 from fastapi.middleware.cors import CORSMiddleware  # Allow mobile app to call API
 
 
 from app.db import engine, Base  # SQLAlchemy engine + declarative Base
-from app.routers import trails # Feature router for /trails endpoints
-from app.routers import auth  # same thing but for authentication
-from app.routers import parks
-
+from app.routers import trails, auth, parks, notes, favorites, nps_admin, activities, profiles, posts, offline # Feature router for all endpoints
 
 #App initialization
 
@@ -51,15 +50,18 @@ app.add_middleware(
 # POST /auth/login which lets the user log into the account
 # added some more but will write out later ^^^^
 
-app.include_router(auth.router)
-app.include_router(trails.router)
-app.include_router(parks.router)
+app.include_router(auth.router, trails.router, parks.router, notes.router, notes.router, favorites.router, nps_admin.router, activities.router, profiles.router, posts.router, offline.router)
+
 
 
 # Static files for uploading images
 # static files directory will be /static.
 # will create a static folder under apps folder to handle the photos
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+
+os.makedirs("media", exist_ok=True) # media directory has to exist for the photos
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
 # check to verify the API is up
@@ -79,4 +81,17 @@ Still have to add:
 - activity & progress
 - search
 - NPS API: which will hold more parks/trails and import wtv else we think would be nice to have from it
+
+
+
+
+keeping track of features:
+profiles - DONE
+community - DONE
+favorites - DONE
+progress - DONE
+notes - DONE
+offline download - DONE
+nps pipeline to insert trails to db - DONE
+search/filters
 """
