@@ -1,3 +1,30 @@
+TrailBlazer README
+
+Contributors: 
+
+Arti Hajdari: 
+Expertise: Leadership, Backend (Python, SQL, APIs, etc.), Diagrams, Documentation
+Role: Project Lead, ensured development stayed on track, created diagrams/documentation, assisted with backend development
+
+Nafis Uddin: 
+Expertise: Backend (Python, SQL, APIs, etc.)
+Role: Backend Developer, ensured full backend logic with APIs and database
+
+Rafi Hossain: 
+Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.), Diagrams
+Role: Frontend Developer, created UI to match Figma Diagrams
+
+Miadul Haque: 
+Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.)
+Role: Frontend Developer, styled the UI of the app, ensured functionality between frontend and backend
+
+Ryan King:
+Expertise: Frontend (Kotlin, Google Maps, etc.), Diagrams
+Role: Frontend Developer, created Map UI with Google Maps, connected frontend and backend for full functionality, assisted with diagrams
+
+
+
+
 * DM Nafis for .env file that holds key for JWT secret, and the later is gonna have the NPS API. I'll email it to you guys.
 
 * DM Ryan for the local.properties file that holds key for google maps API.
