@@ -26,6 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trailblazer.net.ApiClient
+import com.example.trailblazer.net.PostCreateRequest
+import com.example.trailblazer.net.PostDto
+import kotlinx.coroutines.launch
 
 data class Post(
     val id: Int,
@@ -47,28 +51,36 @@ fun CommunityScreen(
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Recent", "Popular", "Friends")
 
-    // Sample posts
-    val posts = remember {
-        listOf(
-            Post(
-                id = 1,
-                username = "Adventure_Sarah",
-                challengeName = "Summit Challenge",
-                timeAgo = "2 hours ago",
-                content = "Just completed the Summit Challenge trail! The views from the top were absolutely breathtaking. Definitely a tough climb but so worth it! 🏔️",
-                likes = 24,
-                comments = 0
-            ),
-            Post(
-                id = 2,
-                username = "MikeHikes",
-                challengeName = "Forest Creek Loop",
-                timeAgo = "4 hours ago",
-                content = "Perfect weather for hiking today! Taking the family out. Any recommendations for kid-friendly snacks on the trail?",
-                likes = 12,
-                comments = 5
-            )
+    var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showNewPostDialog by remember { mutableStateOf(false) }
+    var newPostText by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+
+    fun mapDtoToPost(dto: PostDto): Post {
+        return Post(
+            id = dto.id,
+            username = "Hiker #${dto.userId}",
+            challengeName = null,
+            timeAgo = dto.createdAt,
+            content = dto.body,
+            likes = 0,
+            comments = 0
         )
+    }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val apiPosts = ApiClient.service.getPosts(limit = 50)
+            posts = apiPosts.map(::mapDtoToPost)
+        } catch (e: Exception) {
+            errorMessage = e.message ?: "Failed to load posts."
+        } finally {
+            isLoading = false
+        }
     }
 
     Column(
@@ -97,7 +109,7 @@ fun CommunityScreen(
                     )
 
                     Button(
-                        onClick = { },
+                        onClick = { showNewPostDialog = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF4CAF50)
                         ),
@@ -114,7 +126,7 @@ fun CommunityScreen(
                     }
                 }
 
-                // Tabs
+                // Tabs (purely visual for now)
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = Color.White,
@@ -136,14 +148,38 @@ fun CommunityScreen(
             }
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = Color(0xFFD32F2F),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 13.sp
+            )
+        }
+
         // Posts List
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(posts) { post ->
-                PostCard(post = post)
+            if (isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF4CAF50))
+                    }
+                }
+            } else {
+                items(posts) { post ->
+                    PostCard(post = post)
+                }
             }
         }
 
@@ -151,6 +187,54 @@ fun CommunityScreen(
         BottomNavigationBar(
             currentScreen = "Community",
             onNavigate = onNavigate
+        )
+    }
+
+    if (showNewPostDialog) {
+        AlertDialog(
+            onDismissRequest = { showNewPostDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newPostText.isNotBlank()) {
+                            scope.launch {
+                                try {
+                                    val api = ApiClient.service
+                                    api.createPost(
+                                        PostCreateRequest(
+                                            body = newPostText,
+                                            trailId = null
+                                        )
+                                    )
+                                    // Reload posts
+                                    val apiPosts = api.getPosts(limit = 50)
+                                    posts = apiPosts.map(::mapDtoToPost)
+                                    newPostText = ""
+                                    showNewPostDialog = false
+                                } catch (e: Exception) {
+                                    errorMessage = e.message ?: "Failed to create post."
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Post")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNewPostDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text("New Post") },
+            text = {
+                OutlinedTextField(
+                    value = newPostText,
+                    onValueChange = { newPostText = it },
+                    placeholder = { Text("Share something with the community") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         )
     }
 }
@@ -186,7 +270,7 @@ private fun PostCard(post: Post) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = post.username.first().toString(),
+                        text = post.username.firstOrNull()?.uppercase() ?: "?",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
@@ -264,7 +348,7 @@ private fun PostCard(post: Post) {
                     )
                 }
 
-                // Comment
+                // Comment (still UI-only)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { }

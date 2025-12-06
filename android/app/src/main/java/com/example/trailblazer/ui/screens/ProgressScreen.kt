@@ -6,16 +6,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Hiking
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,12 +21,52 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trailblazer.net.ActivityDto
+import com.example.trailblazer.net.ApiClient
+import com.example.trailblazer.net.ProfileDto
+import kotlinx.coroutines.launch
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 @Composable
 fun ProgressScreen(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var profile by remember { mutableStateOf<ProfileDto?>(null) }
+    var activities by remember { mutableStateOf<List<ActivityDto>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val api = ApiClient.service
+            profile = api.getMyProfile()
+            activities = api.getMyActivities()
+        } catch (e: Exception) {
+            errorMessage = e.message ?: "Failed to load progress."
+        } finally {
+            isLoading = false
+        }
+    }
+
+    // Compute simple stats
+    val totalDistanceKm = activities.mapNotNull { it.distanceKm }.sum()
+    val totalDistanceMi = totalDistanceKm * 0.621371
+    val totalHours = activities.mapNotNull { it.durationMinutes }.sum() / 60.0
+    val trailsCompleted = profile?.totalTrailsCompleted ?: activities.mapNotNull { it.trailId }.distinct().size
+
+    // Weekly goal: 10 miles, use total distance as a simple proxy
+    val weeklyGoalMi = 10.0
+    val weeklyProgress = if (weeklyGoalMi > 0) {
+        min((totalDistanceMi / weeklyGoalMi).toFloat(), 1f)
+    } else 0f
+
+    val weeklyDistanceText = "${(totalDistanceMi * 10.0).roundToInt() / 10.0} / $weeklyGoalMi"
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -61,6 +99,17 @@ fun ProgressScreen(
             }
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = Color(0xFFD32F2F),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 13.sp
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
@@ -86,14 +135,14 @@ fun ProgressScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
-                                progress = { 0.65f },
+                                progress = { weeklyProgress },
                                 modifier = Modifier.size(120.dp),
                                 color = Color(0xFF4CAF50),
                                 strokeWidth = 12.dp,
                                 trackColor = Color.White
                             )
                             Text(
-                                text = "65%",
+                                text = "${(weeklyProgress * 100).roundToInt()}%",
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF4CAF50)
@@ -110,7 +159,7 @@ fun ProgressScreen(
                         )
 
                         Text(
-                            text = "6.5 / 10",
+                            text = weeklyDistanceText,
                             fontSize = 16.sp,
                             color = Color(0xFF757575)
                         )
@@ -123,7 +172,7 @@ fun ProgressScreen(
                         Spacer(Modifier.height(12.dp))
 
                         LinearProgressIndicator(
-                            progress = { 0.65f },
+                            progress = { weeklyProgress },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(8.dp)
@@ -134,8 +183,9 @@ fun ProgressScreen(
 
                         Spacer(Modifier.height(8.dp))
 
+                        val remaining = (weeklyGoalMi - totalDistanceMi).coerceAtLeast(0.0)
                         Text(
-                            text = "3.5 miles to go this week",
+                            text = "${(remaining * 10.0).roundToInt() / 10.0} miles to go",
                             fontSize = 13.sp,
                             color = Color(0xFF757575)
                         )
@@ -154,35 +204,38 @@ fun ProgressScreen(
                     item {
                         StatCard(
                             icon = Icons.Default.LocationOn,
-                            value = "23.4",
+                            value = "${(totalDistanceMi * 10.0).roundToInt() / 10.0}",
                             label = "Total Distance (mi)"
                         )
                     }
                     item {
                         StatCard(
                             icon = Icons.Default.Hiking,
-                            value = "15,680",
+                            value = profile?.totalDistanceKm?.let {
+                                val ft = it * 3280.84
+                                (ft.roundToInt()).toString()
+                            } ?: "—",
                             label = "Total Elevation (ft)"
                         )
                     }
                     item {
                         StatCard(
                             icon = Icons.Default.Hiking,
-                            value = "8",
+                            value = trailsCompleted.toString(),
                             label = "Trails Completed"
                         )
                     }
                     item {
                         StatCard(
                             icon = Icons.Default.Timer,
-                            value = "18",
+                            value = "${(totalHours * 10.0).roundToInt() / 10.0}",
                             label = "Total Hours"
                         )
                     }
                 }
             }
 
-            // Achievements Section
+            // Achievements Section (still static, which is fine)
             item {
                 Column {
                     Text(

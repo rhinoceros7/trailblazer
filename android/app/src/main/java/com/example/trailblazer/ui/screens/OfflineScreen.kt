@@ -13,14 +13,17 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Hiking
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trailblazer.net.ApiClient
+import com.example.trailblazer.net.TrailDto
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 data class DownloadedTrail(
     val id: Int,
@@ -35,12 +38,47 @@ fun OfflineScreen(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val downloadedTrails = remember {
-        listOf(
-            DownloadedTrail(1, "Eagle Peak Trail", "5.7 mi", "49.2 MB", "Downloaded 7 days ago"),
-            DownloadedTrail(2, "Sunset Ridge Loop", "3.8 mi", "32.7 MB", "Downloaded 1 week ago"),
-            DownloadedTrail(3, "Forest Creek Path", "2.1 mi", "18.9 MB", "Downloaded 2 weeks ago")
+    var downloadedTrails by remember { mutableStateOf<List<DownloadedTrail>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var trailIdInput by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+
+    fun mapTrailToDownloaded(trail: TrailDto): DownloadedTrail {
+        val miles = (trail.lengthKm ?: 0.0) * 0.621371
+        val milesText = "${(miles * 10.0).roundToInt() / 10.0} mi"
+        return DownloadedTrail(
+            id = trail.id,
+            name = trail.name,
+            distance = milesText,
+            size = "--",
+            downloadedDate = "Saved for offline"
         )
+    }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val trails = ApiClient.service.getOfflineTrails()
+            downloadedTrails = trails.map(::mapTrailToDownloaded)
+        } catch (e: Exception) {
+            errorMessage = e.message ?: "Failed to load offline trails."
+        } finally {
+            isLoading = false
+        }
+    }
+
+    fun refreshOffline() {
+        scope.launch {
+            try {
+                val trails = ApiClient.service.getOfflineTrails()
+                downloadedTrails = trails.map(::mapTrailToDownloaded)
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Failed to refresh offline trails."
+            }
+        }
     }
 
     Column(
@@ -68,7 +106,7 @@ fun OfflineScreen(
                 )
 
                 Button(
-                    onClick = { },
+                    onClick = { showAddDialog = true },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4CAF50)
                     ),
@@ -86,12 +124,23 @@ fun OfflineScreen(
             }
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = Color(0xFFD32F2F),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 13.sp
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Storage Card
+            // Storage Card (still dummy numbers, but fine for now)
             item {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -159,8 +208,33 @@ fun OfflineScreen(
                 )
             }
 
-            items(downloadedTrails) { trail ->
-                DownloadedTrailCard(trail)
+            if (isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF4CAF50))
+                    }
+                }
+            } else {
+                items(downloadedTrails) { trail ->
+                    DownloadedTrailCard(
+                        trail = trail,
+                        onDelete = {
+                            scope.launch {
+                                try {
+                                    ApiClient.service.toggleOffline(trail.id)
+                                    refreshOffline()
+                                } catch (e: Exception) {
+                                    errorMessage = e.message ?: "Failed to remove offline trail."
+                                }
+                            }
+                        }
+                    )
+                }
             }
 
             // Offline Tips Card
@@ -213,10 +287,54 @@ fun OfflineScreen(
             onNavigate = onNavigate
         )
     }
+
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val id = trailIdInput.toIntOrNull()
+                        if (id != null) {
+                            scope.launch {
+                                try {
+                                    ApiClient.service.toggleOffline(id)
+                                    refreshOffline()
+                                    trailIdInput = ""
+                                    showAddDialog = false
+                                } catch (e: Exception) {
+                                    errorMessage = e.message ?: "Failed to save offline trail."
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text("Save trail for offline") },
+            text = {
+                OutlinedTextField(
+                    value = trailIdInput,
+                    onValueChange = { trailIdInput = it },
+                    label = { Text("Trail ID") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        )
+    }
 }
 
 @Composable
-private fun DownloadedTrailCard(trail: DownloadedTrail) {
+private fun DownloadedTrailCard(
+    trail: DownloadedTrail,
+    onDelete: () -> Unit
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(12.dp)
@@ -271,7 +389,7 @@ private fun DownloadedTrailCard(trail: DownloadedTrail) {
 
             // Delete Button
             IconButton(
-                onClick = { }
+                onClick = onDelete
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,

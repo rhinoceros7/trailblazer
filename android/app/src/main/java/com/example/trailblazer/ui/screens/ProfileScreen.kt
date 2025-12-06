@@ -2,7 +2,6 @@
 package com.example.trailblazer.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trailblazer.net.ApiClient
+import com.example.trailblazer.net.ProfileDto
+import com.example.trailblazer.net.TrailDto
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 data class UserTrail(
     val id: Int,
@@ -39,12 +43,38 @@ fun ProfileScreen(
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Profile", "Achievements", "Settings")
 
-    val userTrails = remember {
-        listOf(
-            UserTrail(1, "Forest Creek Loop", "2.1 miles", "Easy"),
-            UserTrail(2, "Lakeside Path", "1.8 miles", "Easy")
+    var profile by remember { mutableStateOf<ProfileDto?>(null) }
+    var favoriteTrails by remember { mutableStateOf<List<TrailDto>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    fun mapTrailToUserTrail(trail: TrailDto): UserTrail {
+        val miles = (trail.lengthKm ?: 0.0) * 0.621371
+        val milesText = "${(miles * 10.0).roundToInt() / 10.0} mi"
+        return UserTrail(
+            id = trail.id,
+            name = trail.name,
+            distance = milesText,
+            difficulty = trail.difficulty ?: "Unknown"
         )
     }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val api = ApiClient.service
+            profile = api.getMyProfile()
+            favoriteTrails = api.getFavorites()
+        } catch (e: Exception) {
+            errorMessage = e.message ?: "Failed to load profile."
+        } finally {
+            isLoading = false
+        }
+    }
+
+    val userTrails: List<UserTrail> = favoriteTrails.map(::mapTrailToUserTrail)
 
     Column(
         modifier = modifier
@@ -86,6 +116,17 @@ fun ProfileScreen(
             }
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = Color(0xFFD32F2F),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 13.sp
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
@@ -103,6 +144,9 @@ fun ProfileScreen(
                             .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        val displayName = profile?.displayName ?: "TrailBlazer User"
+                        val avatarInitial = displayName.firstOrNull()?.uppercase() ?: "?"
+
                         // Avatar
                         Box(
                             modifier = Modifier
@@ -112,7 +156,7 @@ fun ProfileScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "D",
+                                text = avatarInitial,
                                 color = Color.White,
                                 fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold
@@ -123,13 +167,13 @@ fun ProfileScreen(
 
                         // Name and Username
                         Text(
-                            text = "Demo User",
+                            text = displayName,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF212121)
                         )
                         Text(
-                            text = "@demou",
+                            text = profile?.homeState?.let { "@${it.lowercase()}" } ?: "@hiker",
                             fontSize = 14.sp,
                             color = Color(0xFF757575)
                         )
@@ -137,13 +181,17 @@ fun ProfileScreen(
                         Spacer(Modifier.height(16.dp))
 
                         // Stats Row
+                        val trailsCount = profile?.totalTrailsCompleted ?: 0
+                        val reviewsCount = favoriteTrails.size
+                        val photosCount = 0 // You can wire this later with photo endpoint
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            StatItem(icon = Icons.Default.Hiking, value = "8", label = "Trails")
-                            StatItem(icon = Icons.Default.Star, value = "12", label = "Reviews")
-                            StatItem(icon = Icons.Default.Image, value = "24", label = "Photos")
+                            StatItem(icon = Icons.Default.Hiking, value = trailsCount.toString(), label = "Trails")
+                            StatItem(icon = Icons.Default.Star, value = reviewsCount.toString(), label = "Favorites")
+                            StatItem(icon = Icons.Default.Image, value = photosCount.toString(), label = "Photos")
                         }
 
                         Spacer(Modifier.height(16.dp))
@@ -180,9 +228,26 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(12.dp))
 
-                    userTrails.forEach { trail ->
-                        TrailListItem(trail)
-                        Spacer(Modifier.height(8.dp))
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFF4CAF50))
+                        }
+                    } else if (userTrails.isEmpty()) {
+                        Text(
+                            text = "No trails yet. Mark some favorites to see them here!",
+                            fontSize = 13.sp,
+                            color = Color(0xFF757575)
+                        )
+                    } else {
+                        userTrails.forEach { trail ->
+                            TrailListItem(trail)
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 }
             }
