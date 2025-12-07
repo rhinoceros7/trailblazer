@@ -1,71 +1,73 @@
-TrailBlazer README
-
-**Contributors:** 
+# TrailBlazer README
+---
+## **Contributors:** 
 
 Arti Hajdari: 
-Expertise: Leadership, Backend (Python, SQL, APIs, etc.), Diagrams, Documentation
-Role: Project Lead, ensured development stayed on track, created diagrams/documentation, assisted with backend development
+- Expertise: Leadership, Backend (Python, SQL, APIs, etc.), Diagrams, Documentation
+- Role: Project Lead, ensured development stayed on track, created diagrams/documentation, assisted with backend development
 
 Nafis Uddin: 
-Expertise: Backend (Python, SQL, APIs, etc.)
-Role: Backend Developer, ensured full backend logic with APIs and database
+- Expertise: Backend (Python, SQL, APIs, etc.)
+- Role: Backend Developer, ensured full backend logic with APIs and database
 
 Rafi Hossain: 
-Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.), Diagrams
-Role: Frontend Developer, created UI to match Figma Diagrams
+- Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.), Diagrams
+- Role: Frontend Developer, created UI to match Figma Diagrams
 
 Miadul Haque: 
-Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.)
-Role: Frontend Developer, styled the UI of the app, ensured functionality between frontend and backend
+- Expertise: Frontend (Kotlin, JS, HTML/CSS, etc.)
+- Role: Frontend Developer, styled the UI of the app, ensured functionality between frontend and backend
 
 Ryan King:
-Expertise: Frontend (Kotlin, Google Maps, etc.), Diagrams
-Role: Frontend Developer, created Map UI with Google Maps, connected frontend and backend for full functionality, assisted with diagrams
+- Expertise: Frontend (Kotlin, Google Maps, etc.), Diagrams
+- Role: Frontend Developer, created Map UI with Google Maps, connected frontend and backend for full functionality, assisted with diagrams
 
-**About:** 
+---
+## **About:** 
 
 TrailBlazer is a mobile application designed for nature and outdoor enthusiasts to find, explore, share, and review nature and hiking trails, parks, and more. 
 
 Key Features: 
 
 Map:
-Google Maps integration to display the Map UI that highlights all nearby nature spots in a desired radius from the user
-GPS location tracking in real time when connected to the internet/cellular data
-Smooth Map interaction and animations
-Displays Trails with distance, difficulty, ratings, features, elevation, and more
+- Google Maps integration to display the Map UI that highlights all nearby nature spots within a desired radius from the user
+- GPS location tracking in real time when connected to the internet/cellular data
+- Smooth Map interaction and animations
+- Displays Trails with distance, difficulty, ratings, features, elevation, and more
 
 Community:
-A Community tab where users can post about trails in the form of pictures and descriptions
-5-Star rating system, reviews can be sorted by Recent, Popular, and Friends
-Interaction with other users' posts through liking and commenting
-Following users allows for interaction specifically with friends and in desired groups
+- A Community tab where users can post about trails in the form of pictures and descriptions
+- 5-Star rating system, reviews can be sorted by Recent, Popular, and Friends
+- Interaction with other users' posts through liking and commenting
+- Following users allows for interaction specifically with friends and in desired groups
 
 Security:
-JWT-based token authentication
-Strong Password requirements
-Rate-Limiting to prevent brute-force attacks
-Password hashing
+- JWT-based token authentication
+- Strong Password requirements
+- Rate-Limiting to prevent brute-force attacks
+- Password hashing
 
 Users:
-The user can create a profile/login easily
-User profile shows activity such as trails completed, reviews, and photos
-The user can manage account settings, password management, etc.
+- The user can create a profile/login easily
+- User profile shows activity such as trails completed, reviews, and photos
+- The user can manage account settings, password management, etc.
 
 Progress: 
-The user can create goals in the Progress Tab
-Shows a weekly goal set by the user in miles, and the percentage completed
-Displays information such as distance and elevation traveled, time spent, and trails completed
-Has achievements, so the user can quantify their progress in a gameified way
+- The user can create goals in the Progress Tab
+- Shows a weekly goal set by the user in miles, and the percentage completed
+- Displays information such as distance and elevation traveled, time spent, and trails completed
+- Has achievements, so the user can quantify their progress in a gameified way
 
 Offline:
-The user can download select trails for future use when offline on the trail
-Displays a map of the trail with all necessary details when offline
-Downloads the trail onto the user's device
+- The user can download select trails for future use when offline on the trail
+- Displays a map of the trail with all necessary details when offline
+- Downloads the trail onto the user's device
 
-**User Guide:**
+---
+##  **User Guide:**
 
 Installation and Setup:
-1. (fill in details)
+1. (fill in details yall need to do this part just be specific for every part of the setup like getting her own api not ours, setting up database, apk, android studio, etc however you guys did it for the demos)
 
 Getting Started:
 After downloading and setting up the application, the user takes these steps:
@@ -74,8 +76,66 @@ After downloading and setting up the application, the user takes these steps:
 3. If the account already exists, sign in with Email and Password
 
 Exploring the App:
-1. View and interact with the Map UI to view nearby parks and trails, clicking on them to see their details
-2. 
+1. View and interact with the Map UI to view nearby parks and trails, clicking on them to see their details.
+2. Post pictures and add a review for a desired trail in the Community Tab, and interact with other users' posts as well.
+3. Update your Progress in the progress tab, setting a weekly goal.
+4. Download any future trails you wish to hike for offline use in the Offline tab.
+5. Edit your profile and account settings in the Profile tab.
+
+Testing Strategies:
+
+Test Case 1: User Registration:
+Open the app, click "Sign Up", and enter the details "TestUser" for display name, "test@example.com" for email, and "TestPass123!" for the password, confirm the password, and click Sign Up. The expected results should be successful account creation, you should be redirected to the home screen, your JWT token should be saved, and you should be automatically logged in. You should be able to log in with this email and password correctly each time. Incorrect Email/Password entries will fail and prompt you to enter the correct credentials. A weak password will not be permitted in signup and will prompt you to create a strong one that fits the guidelines. Rate limiting limits the user to 5 incorrect login attempts per 15 minutes
+
+Test Case 2: Navigation:
+After logging in successfully, the user will grant location permissions, and when viewing the map UI, will see their location and trails within 50km marked with map markers. Ex. if the user's location is Times Square, NYC, 15 spots will load, with the closest being the High Line 0.8km away, and Breakneck Ridge being the farthest at 48.3km away. Tapping on a trail will display its name, difficulty, ratings, reviews, distance, elevation, and features (ie, waterfall, viewpoint, etc.)
+
+Test Case 3: Community:
+The user should be able to click on a trail's details, add a review, from 1-5 stars with a short description, and hit Submit.
+
+Test Case 4: Account Settings:
+The user should be able to go into their account settings in the Profile tab, hit Change Password to change their password to a new, strong password successfully. The user can easily log out to not stay logged in when closing and reopening the app.
+
+---
+## **Technology Stack:**
+
+Target Devices:
+- Android: Android SDK 33 (Android 14)
+- IOS: (minimum IOS device here)
+
+Required Software and Packages:
+- list all the stuff you need to have downloaded here
+
+---
+## **Features and Technical Implementation:**
+
+1. Sign In and Authentication:
+   - List all the stuff used for sign in and authentication including where in the repo it is
+
+2. Map UI and Trails:
+   - List all of the stuff used in getting the trail data (api) storing it (database) displaying it (map
+  
+3. Community:
+   - List all of the stuff used for creating reviews, posts, pictures, following users, etc.
+  
+4. Profile:
+   - List all of the profile stuff, settings, etc
+  
+5. Progress:
+   - List all of the stuff for the progress tab
+  
+6. Offline:
+   - List all of the stuff for the offline tab downloading the trails
+  
+
+---
+## **Packages and APIs:**
+
+Packages: 
+- list all packages we used, where they are
+
+APIs: 
+- APIs we used, where they are, and example calls
 
 --------------------------------------------------------------------------------------------------------------------------
 this section below will be deleted after app and readme is done
