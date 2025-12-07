@@ -1,6 +1,6 @@
 TrailBlazer README
 
-Contributors: 
+**Contributors:** 
 
 Arti Hajdari: 
 Expertise: Leadership, Backend (Python, SQL, APIs, etc.), Diagrams, Documentation
@@ -22,8 +22,63 @@ Ryan King:
 Expertise: Frontend (Kotlin, Google Maps, etc.), Diagrams
 Role: Frontend Developer, created Map UI with Google Maps, connected frontend and backend for full functionality, assisted with diagrams
 
+**About:** 
 
+TrailBlazer is a mobile application designed for nature and outdoor enthusiasts to find, explore, share, and review nature and hiking trails, parks, and more. 
 
+Key Features: 
+
+Map:
+Google Maps integration to display the Map UI that highlights all nearby nature spots in a desired radius from the user
+GPS location tracking in real time when connected to the internet/cellular data
+Smooth Map interaction and animations
+Displays Trails with distance, difficulty, ratings, features, elevation, and more
+
+Community:
+A Community tab where users can post about trails in the form of pictures and descriptions
+5-Star rating system, reviews can be sorted by Recent, Popular, and Friends
+Interaction with other users' posts through liking and commenting
+Following users allows for interaction specifically with friends and in desired groups
+
+Security:
+JWT-based token authentication
+Strong Password requirements
+Rate-Limiting to prevent brute-force attacks
+Password hashing
+
+Users:
+The user can create a profile/login easily
+User profile shows activity such as trails completed, reviews, and photos
+The user can manage account settings, password management, etc.
+
+Progress: 
+The user can create goals in the Progress Tab
+Shows a weekly goal set by the user in miles, and the percentage completed
+Displays information such as distance and elevation traveled, time spent, and trails completed
+Has achievements, so the user can quantify their progress in a gameified way
+
+Offline:
+The user can download select trails for future use when offline on the trail
+Displays a map of the trail with all necessary details when offline
+Downloads the trail onto the user's device
+
+**User Guide:**
+
+Installation and Setup:
+1. (fill in details)
+
+Getting Started:
+After downloading and setting up the application, the user takes these steps:
+1. Click Sign-Up to create an account
+2. Enter a Username (Ex. JohnHikes23), Email Address, and Strong Password (Ex. Password123!)
+3. If the account already exists, sign in with Email and Password
+
+Exploring the App:
+1. View and interact with the Map UI to view nearby parks and trails, clicking on them to see their details
+2. 
+
+--------------------------------------------------------------------------------------------------------------------------
+this section below will be deleted after app and readme is done
 
 * DM Nafis for .env file that holds key for JWT secret, and the later is gonna have the NPS API. I'll email it to you guys.
 
