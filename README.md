@@ -84,7 +84,7 @@
         MAPS_API_KEY=your_google_maps_api_key_here
         API_BASE_URL=http://10.0.2.2:8000
         
-      - To get a Google Maps API key: Go to Google Cloud Console
+      - To get a Google Maps API key: Go to [Google Cloud Console](https://console.cloud.google.com/)
         - Create a new project or select an existing one
         - Enable "Maps SDK for Android"
         - Create credentials → API Key
@@ -101,7 +101,7 @@
           ```bash
           pip install -r requirements.txt
    
-        - Create an .env file and add the necessary keys (To get an NPS API key, visit https://www.nps.gov/subjects/developer/get-started.htm) :
+        - Create an .env file and add the necessary keys (To get an NPS API key, visit https://www.nps.gov/subjects/developer/get-started.htm :
           ```env 
            JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
            NPS_API_KEY=your_nps_api_key_here 
@@ -116,6 +116,10 @@
    6. Start Backend Server:
       ```bash
       uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   - Verify backend is running:
+     - Open browser to http://localhost:8000
+     - Should see: {"status":"ok","service":"trailblazer"}
+     - API documentation: http://localhost:8000/docs
    
    
    Installing the App:
@@ -165,7 +169,8 @@
    - Git: Version control
    
    Required Software and Packages:
-   - list all the stuff you need to have downloaded here
+   - Stated in detail in the [User Guide](#-User-Guide)
+   - Google Account, Google Maps API key, National Parks Service API key, necessary Python libraries
 
 ---
 ## **Features and Technical Implementation:**
