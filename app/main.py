@@ -8,7 +8,7 @@ Main for Trailblazer
 """
 
 import os
-
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles  # where we have images
 from fastapi.middleware.cors import CORSMiddleware  # Allow mobile app to call API
@@ -22,6 +22,11 @@ from app.routers import trails, auth, parks, notes, favorites, nps_admin, activi
 # Create the FastAPI application object
 # The title/version show up in the auto generated docs at /docs
 app = FastAPI(title="Trailblazer", version="0.1.0")
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
+
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Create all database tables on startup
 Base.metadata.create_all(bind=engine)
